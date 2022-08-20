@@ -23,8 +23,8 @@
         #text {
             display: block;
             position: fixed;
-            top: 20%;
-            height: calc(100% - 20% - 10%);
+            top: 25%;
+            max-height: calc(100% - 20% - 10%);
             left: 5%;
             width: calc(100% - 5% * 2);
             overflow:auto;
@@ -43,7 +43,7 @@
         }
         .material-icons {
             font-size: 8vw;
-            margin: 0 0.5rem;
+            margin: 0 0.75rem;
             cursor: pointer;
             color: whitesmoke;
         }
@@ -128,10 +128,10 @@
             this.lineStyle = 'round'//lineStyle: 線のスタイル
             this.flickering = 100//flickering: ちらつき
             this.trace = 3//trace: 痕跡
-            this.traceSpeed = 100//traceSpeed: スピード
+            this.traceSpeed = 10//traceSpeed: 打ち上げスピード1-100
             this.intensity = 20//intensity: 発射頻度
-            this.explosion = 10//explosion: 線の細さ
-            this.gravity = 1.75//gravity: 重力
+            this.explosion = 6//explosion: 線の細さ1-10
+            this.gravity = 0.85//gravity: 重力
             this.opacity = 0.6//opacity: 不透明度
             this.particles = 128//particles: 粒子
             this.friction = 0.97//friction: 拡散
@@ -142,7 +142,7 @@
                 explosion: { min: 3, max: 10 },
                 trace: { min: 0, max: 3 }
             }
-            // this.mouse = { click: false, move: false, max: 1 }//mouse: マウス
+            this.mouse = { click: true, move: false, max: 3 }//mouse: マウス
             this.delay = {//delay: 遅れ
                 min: 128,
                 max: 256
@@ -151,7 +151,7 @@
                 min: 12,
                 max: 100
             }
-            this.decay = { min: 0.001, max: 0.05 }//decay: 減衰
+            this.decay = { min: 0.001, max: 0.03 }//decay: 減衰
             this.sound = {//sound: 音
                 enabled: false,
                 files: [
