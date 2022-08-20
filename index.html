@@ -6,6 +6,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>花火だより</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="style/font.css"></link>
     <style>
@@ -107,7 +108,7 @@
 
         //share
         const share = function(){ window.navigator.share({
-            title: '花火だより',
+            title: document.head.title,
             text: '花火に乗せてメッセージを伝えよう！',
             url: window.location.href,
         });}
