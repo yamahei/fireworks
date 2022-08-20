@@ -1,0 +1,278 @@
+<!--
+    超お手軽！JavaScriptで打ち上げ花火を作って楽しめる「fireworks-js」を使ってみた！
+    https://paiza.hatenablog.com/entry/2022/08/17/143000
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="style/font.css"></link>
+    <style>
+        html, body {
+            background-color: #000
+        }
+        #container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        #text {
+            display: block;
+            position: fixed;
+            top: 20%;
+            height: calc(100% - 20% - 10%);
+            left: 5%;
+            width: calc(100% - 5% * 2);
+            overflow:auto;
+            text-align: center;
+            font-size: 10vw;
+            color: white;
+        }
+        #control {
+            display: block;
+            position: fixed;
+            bottom: 5%;
+            left: 0;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+        }
+        .material-icons {
+            font-size: 8vw;
+            margin: 0 0.5rem;
+            cursor: pointer;
+            color: whitesmoke;
+        }
+
+        #setting {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: calc(100% - 1rem * 2);
+            height: calc(100% - 1rem * 2);
+            z-index: 10;
+            padding: 1rem;
+        }
+        #setting * {
+            font-size: 5vw;
+        }
+        #setting > fieldset {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 1rem;
+            border: none;
+        }
+        #setting > fieldset > label,
+        #setting > fieldset > label > input
+        {
+            width: 100%;
+        }
+        #setting > fieldset > p {
+            text-align: center;
+        }
+    </style>
+    <script defer type="module">
+        // import { Fireworks } from 'https://cdn.skypack.dev/fireworks-js';
+        import { Fireworks } from './script/fireworks-js.js';
+
+        /**
+         * util
+         */
+        //params
+        const paramsToSearch = function(params){
+            return "?" + Object.keys(params).map((key)=>{
+                return `${key}=${encodeURI(params[key])}`;
+            }).join("&");
+        };
+        const getParams = function(){
+            const query = window.location.search.replace(/^\?/, "") || "";
+            const list = query.split("&");
+            const params = {};
+            list.forEach(item => {
+                const [key, value] = item.split("=");
+                params[key] = decodeURI(value);
+            });
+            return params;
+        };
+        const params = getParams(window);
+
+        //material-icon visible
+        const iconVisible = function($icon, visible){
+            $icon.style.display = visible ? "inline-block" : "none";
+        };
+
+        //share
+        const share = function(){ window.navigator.share({
+            title: '花火だより',
+            text: '花火に乗せてメッセージを伝えよう！',
+            url: window.location.href,
+        });}
+
+
+        /**
+         * text content
+         */
+        const $text = document.getElementById('text');
+        const content = params.txt || "Fireworks!";
+        $text.textContent = content;
+
+        /**
+         * fireworks
+         */
+        const options = function(){
+            this.autoresize = true//autoresize: 自動サイズ変更
+            this.lineStyle = 'round'//lineStyle: 線のスタイル
+            this.flickering = 100//flickering: ちらつき
+            this.trace = 3//trace: 痕跡
+            this.traceSpeed = 100//traceSpeed: スピード
+            this.intensity = 20//intensity: 発射頻度
+            this.explosion = 10//explosion: 線の細さ
+            this.gravity = 1.75//gravity: 重力
+            this.opacity = 0.6//opacity: 不透明度
+            this.particles = 128//particles: 粒子
+            this.friction = 0.97//friction: 拡散
+            this.acceleration = 1//acceleration: 加速度
+            this.hue = { min: 0, max: 360 }//hue: 色相
+            this.rocketsPoint = { min: 40, max: 60 }//rocketsPoint: ロケットポイント
+            this.lineWidth = {//lineWidth: 線幅
+                explosion: { min: 3, max: 10 },
+                trace: { min: 0, max: 3 }
+            }
+            // this.mouse = { click: false, move: false, max: 1 }//mouse: マウス
+            this.delay = {//delay: 遅れ
+                min: 128,
+                max: 256
+            }
+            this.brightness = {//brightness: 輝度
+                min: 12,
+                max: 100
+            }
+            this.decay = { min: 0.001, max: 0.05 }//decay: 減衰
+            this.sound = {//sound: 音
+                enabled: false,
+                files: [
+                    'assets/explosion0.mp3',
+                    'assets/explosion1.mp3',
+                    'assets/explosion2.mp3'
+                ],
+                volume: { min: 10, max: 50 }
+            }
+            this.boundaries = { height: 0, width: 0, x: 40, y: 60 }//boundaries: 境界
+        }
+        //fireworks
+        const $container = document.getElementById('container');
+        const fireworks = new Fireworks($container, new options());
+        fireworks.start();
+
+        //sound switch
+        const $volume_off = document.getElementById('volume_off');
+        const $volume_up = document.getElementById('volume_up');
+        let volume_flg = true;
+        const switch_sound = function(){
+            volume_flg = !volume_flg;
+            iconVisible($volume_off, !volume_flg);
+            iconVisible($volume_up, volume_flg);
+            fireworks.updateOptions({
+                sound: {
+                    enabled: volume_flg,
+                }
+            });
+        };
+        switch_sound();//first action
+        $volume_off.addEventListener("click", switch_sound);
+        $volume_up.addEventListener("click", switch_sound);
+
+        //share
+        const $share = document.getElementById('share');
+        const shareable = navigator.canShare;
+        iconVisible($share, shareable);
+        $share.addEventListener("click", ()=>{share(window)});
+
+        //setting
+        const $setting = document.getElementById('setting');
+        const $open_setting = document.getElementById('open_setting');
+        const $setting_ok = document.getElementById('setting_ok');
+        const $setting_cancel = document.getElementById('setting_cancel');
+        const setSetting = function(settings){
+            //txt, ...
+            Object.keys(settings).forEach((key)=>{
+                const $elements = document.getElementsByName(key);
+                const $element = $elements.length ? $elements[0] : null;
+                if($element && settings[key] !== undefined){
+                    $element.value = settings[key]
+                }
+            });
+        };
+        const getSetting = function(){
+            const keys = "txt".split(/\s*,\s*/g);
+            const settings = {};
+            keys.forEach((key)=>{
+                const $elements = document.getElementsByName(key);
+                const $element = $elements.length ? $elements[0] : null;
+                const value = $element ? $element.value : null;
+                if($element && value !== null){
+                    settings[key] = value;
+                }
+            });
+            return settings;
+        };
+        setSetting(params);//first action
+        let _settingVisible = false;
+        const toggleSetting = function(){
+            _settingVisible = !_settingVisible;
+            $setting.style.display = _settingVisible ? "block" : "none";
+        };
+        $open_setting.addEventListener("click", toggleSetting);
+        $setting_cancel.addEventListener("click", ()=>{
+            toggleSetting();
+            setSetting(params);
+        });
+        $setting_ok.addEventListener("click", ()=>{
+            const settings = getSetting();
+            const search = paramsToSearch(settings);
+            const base = window.location.href.split("?").shift();
+            const url = `${base}${search}`;
+            window.location.href = url;
+            //toggleSetting();
+        });
+
+
+    </script>
+</head>
+<body>
+    <div id="container"></div>
+    <div id="text"></div>
+    <div id="control">
+        <span class="material-icons" id="open_setting">
+            settings
+        </span>
+        <span class="material-icons" id="volume_off">
+            volume_off
+        </span>
+        <span class="material-icons" id="volume_up">
+            volume_up
+        </span>
+        <span class="material-icons" id="share">
+            share
+        </span>
+    </div>
+    <div id="setting">
+        <fieldset>
+            <p>Setting</p>
+            <label>
+                <span>メッセージ</span>
+                <input type="text" name="txt" placeholder="Fireworks!"/>
+            </label>
+            <p>
+                <button id="setting_cancel">Cancel</button>
+                <button id="setting_ok">OK</button>
+            </p>
+        </fieldset>
+    </div>
+
+</body>
+</html>
